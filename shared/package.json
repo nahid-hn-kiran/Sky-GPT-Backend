@@ -1,0 +1,8 @@
+{
+  "name": "@skygpt/shared",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    "./redis": "./redis/redis.ts"
+  }
+}
