@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyGPT Auth Tester</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; padding: 30px 20px; display: flex; justify-content: center; }
+    .container { max-width: 760px; width: 100%; display: flex; flex-direction: column; gap: 24px; }
+    .header { text-align: center; margin-bottom: 8px; }
+    .header h1 { font-size: 28px; color: #38bdf8; }
+    .header p { color: #94a3b8; font-size: 14px; margin-top: 6px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 22px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); }
+    .card h2 { font-size: 18px; color: #f1f5f9; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 12px; }
+    button { cursor: pointer; padding: 11px 18px; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-google { background: #ea4335; color: white; }
+    .btn-google:hover { background: #dc2626; }
+    .btn-github { background: #24292e; color: white; border: 1px solid #475569; }
+    .btn-github:hover { background: #000; }
+    .btn-facebook { background: #1877f2; color: white; }
+    .btn-facebook:hover { background: #166fe5; }
+    .btn-primary { background: #0284c7; color: white; }
+    .btn-primary:hover { background: #0369a1; }
+    .btn-secondary { background: #475569; color: white; }
+    .btn-secondary:hover { background: #334155; }
+    .btn-danger { background: #e11d48; color: white; }
+    .btn-danger:hover { background: #be123c; }
+    .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    label { font-size: 13px; color: #cbd5e1; }
+    input { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px 14px; color: white; font-size: 14px; }
+    input:focus { outline: none; border-color: #38bdf8; }
+    pre { background: #0b1120; border: 1px solid #1e293b; padding: 14px; border-radius: 8px; overflow-x: auto; font-size: 13px; color: #38bdf8; }
+    .alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 12px; display: none; }
+    .alert-error { background: #7f1d1d; border: 1px solid #991b1b; color: #fecaca; }
+    .alert-success { background: #064e3b; border: 1px solid #065f46; color: #a7f3d0; }
+    .tag { font-size: 11px; padding: 2px 8px; border-radius: 9999px; background: #38bdf8; color: #0f172a; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>SkyGPT Auth Tester</h1>
+      <p>Self-contained development sandbox for testing Social Logins & Admin RBAC</p>
+    </div>
+
+    <div id="statusAlert" class="alert"></div>
+
+    <!-- 1. Social Logins for Users -->
+    <div class="card">
+      <h2>Social Logins <span class="tag">Role: User</span></h2>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">
+        Clicking initiates a POST request to <code>/api/v1/auth/sign-in/social</code> and redirects to provider.
+      </p>
+      <div class="btn-group">
+        <button class="btn-google" onclick="signInSocial('google')">
+          <span>Google Sign-In</span>
+        </button>
+        <button class="btn-github" onclick="signInSocial('github')">
+          <span>GitHub Sign-In</span>
+        </button>
+        <button class="btn-facebook" onclick="signInSocial('facebook')">
+          <span>Facebook Sign-In</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. Admin Sign-In (Email/Password) -->
+    <div class="card">
+      <h2>Admin Sign-In <span class="tag">Role: Admin</span></h2>
+      <div class="input-group">
+        <label>Admin Email</label>
+        <input type="email" id="adminEmail" value="admin@skygpt.com" placeholder="admin@skygpt.com">
+      </div>
+      <div class="input-group">
+        <label>Admin Password</label>
+        <input type="password" id="adminPassword" value="AdminSecurePassword123!" placeholder="Password">
+      </div>
+      <button class="btn-primary" onclick="signInAdmin()">Sign In as Admin</button>
+    </div>
+
+    <!-- 3. Current Session Inspector -->
+    <div class="card">
+      <h2>Current Session & Role Inspector</h2>
+      <div class="btn-group" style="margin-bottom: 12px;">
+        <button class="btn-secondary" onclick="checkSession()">Refresh Session Info</button>
+        <button class="btn-danger" onclick="signOut()">Sign Out</button>
+      </div>
+      <pre id="sessionOutput">// Click 'Refresh Session Info' to check active cookie</pre>
+    </div>
+
+    <!-- 4. Admin Creates Another Admin -->
+    <div class="card">
+      <h2>Admin Delegation <span class="tag">Protected</span></h2>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">
+        Requires an active session with <code>role: 'admin'</code>. Calls <code>POST /api/v1/auth/admin/create-admin</code>.
+      </p>
+      <div class="input-group">
+        <label>New Admin Name</label>
+        <input type="text" id="newAdminName" placeholder="Second Admin">
+      </div>
+      <div class="input-group">
+        <label>New Admin Email</label>
+        <input type="email" id="newAdminEmail" placeholder="admin2@skygpt.com">
+      </div>
+      <div class="input-group">
+        <label>New Admin Password</label>
+        <input type="password" id="newAdminPassword" placeholder="Minimum 8 characters">
+      </div>
+      <button class="btn-primary" onclick="createAdmin()">Create Admin</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api/v1/auth';
+
+    function showAlert(message, isError = false) {
+      const el = document.getElementById('statusAlert');
+      el.style.display = 'block';
+      el.className = isError ? 'alert alert-error' : 'alert alert-success';
+      el.textContent = message;
+    }
+
+    // 1. Social Login Trigger
+    async function signInSocial(provider) {
+      showAlert(`Initiating ${provider} login...`);
+      try {
+        const res = await fetch(`${API_BASE}/sign-in/social`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            provider: provider,
+            callbackURL: window.location.href
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || data.error || `HTTP ${res.status}`);
+        }
+
+        if (data.url) {
+          showAlert(`Redirecting to ${provider}...`);
+          window.location.href = data.url;
+        } else {
+          showAlert(`Response received without URL: ${JSON.stringify(data)}`, true);
+        }
+      } catch (err) {
+        showAlert(`Failed to initiate ${provider} login: ${err.message}`, true);
+      }
+    }
+
+    // 2. Admin Email/Password Sign-In
+    async function signInAdmin() {
+      const email = document.getElementById('adminEmail').value.trim();
+      const password = document.getElementById('adminPassword').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/sign-in/email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || data.error || `HTTP ${res.status}`);
+        }
+
+        showAlert(`Logged in successfully as Admin: ${data.user?.email || email}`);
+        checkSession();
+      } catch (err) {
+        showAlert(`Admin sign-in failed: ${err.message}`, true);
+      }
+    }
+
+    // 3. Check Session
+    async function checkSession() {
+      try {
+        const res = await fetch(`${API_BASE}/get-session`, {
+          credentials: 'include'
+        });
+        const data = await res.json();
+        document.getElementById('sessionOutput').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('sessionOutput').textContent = `Error reading session: ${err.message}`;
+      }
+    }
+
+    // 4. Create Another Admin
+    async function createAdmin() {
+      const name = document.getElementById('newAdminName').value.trim();
+      const email = document.getElementById('newAdminEmail').value.trim();
+      const password = document.getElementById('newAdminPassword').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/admin/create-admin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || data.error || `HTTP ${res.status}`);
+        }
+
+        showAlert(`New admin created: ${data.data?.email}`);
+      } catch (err) {
+        showAlert(`Failed to create admin: ${err.message}`, true);
+      }
+    }
+
+    // 5. Sign Out
+    async function signOut() {
+      try {
+        await fetch(`${API_BASE}/sign-out`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        showAlert('Signed out successfully.');
+        checkSession();
+      } catch (err) {
+        showAlert(`Sign-out error: ${err.message}`, true);
+      }
+    }
+
+    // Run check on load
+    checkSession();
+  </script>
+</body>
+</html>
