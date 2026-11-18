@@ -6,11 +6,12 @@ const conversationSchema = new mongoose.Schema(
       type: String,
       required: true,
       default: "New Conversation",
+      trim: true,
     },
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
+      index: true,
     },
   },
   {

@@ -1,24 +1,27 @@
-import { Router, Request, Response } from 'express';
+import { Request, Response, Router } from "express";
+import chatRoutes from "./chat.route";
 
 const router = Router();
 
-// Direct health check
-router.get('/health', (req: Request, res: Response) => {
+// Health check endpoints
+router.get("/health", (req: Request, res: Response) => {
   res.status(200).json({
-    status: 'ok',
-    service: 'chat-service',
+    status: "ok",
+    service: "chat-service",
     timestamp: new Date().toISOString(),
   });
 });
 
-// Gateway-proxied route prefix: /api/v1/chat
-router.get('/api/v1/chat/health', (req: Request, res: Response) => {
+router.get("/api/v1/chat/health", (req: Request, res: Response) => {
   res.status(200).json({
-    status: 'ok',
-    service: 'chat-service',
-    message: 'Chat service is operational',
+    status: "ok",
+    service: "chat-service",
+    message: "Chat service is operational",
     timestamp: new Date().toISOString(),
   });
 });
+
+// Register Chat & Conversation routes
+router.use("/api/v1/chat", chatRoutes);
 
 export default router;
