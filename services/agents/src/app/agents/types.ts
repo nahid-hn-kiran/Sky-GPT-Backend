@@ -2,12 +2,20 @@ import { BaseMessage } from "@langchain/core/messages";
 import { Annotation } from "@langchain/langgraph";
 
 /**
- * The standard agent types supported across SkyGPT
+ * The standard agent types supported across SkyGPT.
+ * "auto" invokes the LangGraph Supervisor to classify and route dynamically!
  */
-export type AgentType = "chat" | "search" | "coding" | "pdf" | "ppt" | "image";
+export type AgentType =
+  | "auto"
+  | "chat"
+  | "search"
+  | "coding"
+  | "pdf"
+  | "ppt"
+  | "image";
 
 /**
- * Unified State shared across all 6 agents.
+ * Unified State shared across all agents and the supervisor.
  */
 export const AgentState = Annotation.Root({
   // All chat history (UserMessage, AIMessage, ToolMessage)
@@ -28,7 +36,7 @@ export const AgentState = Annotation.Root({
   // Which agent is currently handling the request
   currentAgent: Annotation<AgentType>({
     reducer: (_, update) => update,
-    default: () => "chat",
+    default: () => "auto",
   }),
 });
 

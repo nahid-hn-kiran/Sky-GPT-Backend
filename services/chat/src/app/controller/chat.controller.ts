@@ -154,14 +154,13 @@ export const deleteConversationHandler = async (
 
 /**
  * POST /api/v1/chat/conversations/:id/messages
- * Send a user message to a conversation
+ * Send a user message and get the AI assistant response
  */
 export const createMessageHandler = async (req: Request, res: Response) => {
   try {
     const userId = req.headers["x-user-id"] as string;
     const { id: conversationId } = req.params;
-    const { content } = req.body;
-
+    const { content, agentType } = req.body;
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -169,7 +168,6 @@ export const createMessageHandler = async (req: Request, res: Response) => {
         message: "User ID missing",
       });
     }
-
     if (!content || typeof content !== "string" || content.trim() === "") {
       return res.status(400).json({
         success: false,
@@ -177,12 +175,12 @@ export const createMessageHandler = async (req: Request, res: Response) => {
         message: "Message content is required and cannot be empty",
       });
     }
-
-    const result = await chatService.createUserMessage(
-      conversationId as string,
+    const result = await chatService.sendMessageAndGetAIResponse({
+      conversationId: conversationId as string,
       userId,
-      content.trim(),
-    );
+      content: content.trim(),
+      agentType: agentType || "chat",
+    });
     if (!result) {
       return res.status(404).json({
         success: false,
@@ -190,12 +188,15 @@ export const createMessageHandler = async (req: Request, res: Response) => {
         message: "Conversation not found or access denied",
       });
     }
-
     return res.status(201).json({
       success: true,
-      message: "Message sent successfully",
-      data: result.message,
-      conversationTitle: result.conversation.title,
+      message: "Message processed successfully",
+      data: {
+        userMessage: result.userMessage,
+        assistantMessage: result.assistantMessage,
+        agentUsed: result.agentUsed,
+        conversationTitle: result.conversation.title,
+      },
     });
   } catch (error: any) {
     return res.status(500).json({

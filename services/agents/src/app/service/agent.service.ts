@@ -61,6 +61,6 @@ export const executeAgent = async (
       typeof lastMessage.content === "string"
         ? lastMessage.content
         : JSON.stringify(lastMessage.content),
-    agentUsed: agentType,
+    agentUsed: (result as any).agentUsed || agentType,
   };
 };

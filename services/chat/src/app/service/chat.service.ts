@@ -128,3 +128,94 @@ export const createUserMessage = async (
     message: userMessage,
   };
 };
+
+export interface SendMessageOptions {
+  conversationId: string;
+  userId: string;
+  content: string;
+  agentType?: string;
+}
+
+/**
+ * 7. Send user message, invoke LangGraph agent, and store assistant reply
+ */
+export const sendMessageAndGetAIResponse = async ({
+  conversationId,
+  userId,
+  content,
+  agentType = "chat",
+}: SendMessageOptions) => {
+  // 1. Verify conversation ownership and save the user message
+  const userResult = await createUserMessage(conversationId, userId, content);
+  if (!userResult) {
+    return null;
+  }
+
+  // 2. Fetch recent conversation history (last 10 messages) for agent memory
+  const history = await Message.find({ conversationId })
+    .sort({ createdAt: 1 })
+    .limit(10)
+    .lean();
+
+  const formattedHistory = history.map((msg) => ({
+    role: msg.role as "user" | "assistant" | "system",
+    content: msg.content,
+  }));
+
+  // 3. Call the Agents Service (Port 4003)
+  const AGENTS_SERVICE_URL =
+    process.env.AGENTS_SERVICE_URL || "http://localhost:4003";
+
+  let assistantContent = "I apologize, but I could not generate a response.";
+  let resolvedAgent = agentType;
+
+  try {
+    const response = await fetch(
+      `${AGENTS_SERVICE_URL}/api/v1/agents/execute`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": userId,
+        },
+        body: JSON.stringify({
+          agentType,
+          conversationId,
+          messages: formattedHistory,
+        }),
+      },
+    );
+
+    if (response.ok) {
+      const data = (await response.json()) as {
+        success: boolean;
+        data?: { content: string; agentUsed: string };
+      };
+      if (data.data?.content) {
+        assistantContent = data.data.content;
+        resolvedAgent = data.data.agentUsed || agentType;
+      }
+    } else {
+      const errorText = await response.text();
+      console.error(`[Agents Service Error ${response.status}]:`, errorText);
+      assistantContent = `Error from Agent Service: HTTP ${response.status}`;
+    }
+  } catch (error: any) {
+    console.error("[Agents Service Connection Failed]:", error.message);
+    assistantContent = `Failed to connect to Agent Service: ${error.message}`;
+  }
+
+  // 4. Save the AI's assistant response in MongoDB
+  const assistantMessage = await saveMessage(
+    conversationId,
+    "assistant",
+    assistantContent,
+  );
+
+  return {
+    conversation: userResult.conversation,
+    userMessage: userResult.message,
+    assistantMessage,
+    agentUsed: resolvedAgent,
+  };
+};
