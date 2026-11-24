@@ -1,4 +1,5 @@
 import { chatAgent } from "./chat/chat.agent";
+import { codingAgent } from "./coding/coding.agent";
 import { searchAgent } from "./search/search.agent";
 import { AgentType } from "./types";
 
@@ -7,7 +8,7 @@ export * from "./types";
 export const agentRegistry: Record<AgentType, any> = {
   chat: chatAgent,
   search: searchAgent,
-  coding: chatAgent, // placeholder until we build coding agent
+  coding: codingAgent, // placeholder until we build coding agent
   pdf: chatAgent, // placeholder
   ppt: chatAgent, // placeholder
   image: chatAgent, // placeholder
