@@ -1,10 +1,11 @@
-import dotenv from 'dotenv';
-import path from 'path';
+import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 export const config = {
   port: Number(process.env.PORT) || 4003,
-  nodeEnv: process.env.NODE_ENV || 'development',
-  mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/skygpt_agents',
+  nodeEnv: process.env.NODE_ENV || "development",
+  mongoUri: process.env.MONGO_URI || "mongodb://localhost:27017/skygpt_agents",
+  geminiApiKey: process.env.GEMINI_API_KEY || "",
 };
