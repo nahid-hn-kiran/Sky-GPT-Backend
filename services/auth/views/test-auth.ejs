@@ -282,6 +282,26 @@
       </div>
     </div>
 
+    <!-- 4.5 Document Ingestion for PDF / RAG Agent -->
+    <div class="card">
+      <h2>📄 Document & PDF Ingest Sandbox <span class="tag">RAG Vector Store</span></h2>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">
+        Paste raw document/policy text or notes to index them into the vector store.
+      </p>
+      <div class="input-group">
+        <label>Document Name</label>
+        <input type="text" id="docName" value="company-policy.txt" placeholder="e.g. employee-handbook.pdf" />
+      </div>
+      <div class="input-group">
+        <label>Document Content</label>
+        <textarea id="docContent" rows="4" style="width: 100%; background: #0f172a; color: #f8fafc; border: 1px solid #334155; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 13px;" placeholder="Paste sample policy, contract, or report text here...">SkyGPT Remote Work Policy 2026:
+All core engineering team members are allowed up to 4 days of remote work per week.
+Annual learning stipend is $3,000 per engineer for AI certifications and conferences.
+Health insurance covers 100% of dental, vision, and wellness subscriptions.</textarea>
+      </div>
+      <button class="btn-primary" id="btnIngestDoc" onclick="ingestDocument()">Index Document in Vector Store</button>
+    </div>
+
     <!-- 5. Interactive LangGraph Agent Tester -->
     <div class="card">
       <h2>
@@ -473,6 +493,44 @@
         }
       }
 
+      // 5.5 Ingest Document for RAG / PDF Agent
+      const ingestDocument = async () => {
+        const fileName = document.getElementById("docName").value.trim();
+        const text = document.getElementById("docContent").value.trim();
+        const btn = document.getElementById("btnIngestDoc");
+
+        if (!text) {
+          showAlert("Please enter document content to index", true);
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Embedding & Indexing (Gemini text-embedding-004)...";
+
+        try {
+          const res = await fetch("/api/v1/agents/documents/ingest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              conversationId: "default-session",
+              fileName,
+              text,
+            }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || data.error);
+
+          showAlert(`Indexed successfully! ${data.data?.chunkCount} chunks stored in Vector Store.`);
+        } catch (err) {
+          showAlert(`Ingestion failed: ${err.message}`, true);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Index Document in Vector Store";
+        }
+      };
+
       // 6. Execute LangGraph Agent
       const runAgent = async () => {
         const prompt = document.getElementById("agentPrompt").value.trim();
@@ -496,6 +554,7 @@
             credentials: "include", // Sends session cookie
             body: JSON.stringify({
               agentType: agentType,
+              conversationId: "default-session",
               messages: [{ role: "user", content: prompt }],
             }),
           });
