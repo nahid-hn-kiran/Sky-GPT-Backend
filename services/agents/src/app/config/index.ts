@@ -8,4 +8,5 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || "development",
   mongoUri: process.env.MONGO_URI || "mongodb://localhost:27017/skygpt_agents",
   geminiApiKey: process.env.GEMINI_API_KEY || "",
+  tavilyApiKey: process.env.TAVILY_API_KEY || "",
 };
