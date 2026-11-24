@@ -3,24 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SkyGPT Auth Tester</title>
+    <title>SkyGPT Developer Control Center & Microservice Playground</title>
+    <!-- Marked.js for rich markdown rendering in outputs -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       }
       body {
-        background: #0f172a;
-        color: #f8fafc;
-        padding: 30px 20px;
+        background: #090d16;
+        color: #f1f5f9;
+        padding: 40px 20px;
         display: flex;
         justify-content: center;
       }
       .container {
-        max-width: 760px;
+        max-width: 900px;
         width: 100%;
         display: flex;
         flex-direction: column;
@@ -28,31 +29,65 @@
       }
       .header {
         text-align: center;
-        margin-bottom: 8px;
+        padding: 10px 0 20px 0;
+        border-bottom: 1px solid #1e293b;
       }
       .header h1 {
-        font-size: 28px;
-        color: #38bdf8;
+        font-size: 32px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
       }
       .header p {
         color: #94a3b8;
         font-size: 14px;
-        margin-top: 6px;
+        margin-top: 8px;
+      }
+      .badge-row {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+      }
+      .badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        border: 1px solid #334155;
+        background: #1e293b;
+        color: #cbd5e1;
+      }
+      .badge.live {
+        border-color: #059669;
+        color: #34d399;
       }
       .card {
-        background: #1e293b;
-        border: 1px solid #334155;
-        border-radius: 12px;
-        padding: 22px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        background: #111827;
+        border: 1px solid #1f2937;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
       }
       .card h2 {
         font-size: 18px;
-        color: #f1f5f9;
+        font-weight: 700;
+        color: #f8fafc;
         margin-bottom: 14px;
         display: flex;
         align-items: center;
-        gap: 8px;
+        justify-content: space-between;
+      }
+      .tag {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        background: #0284c7;
+        color: #f0f9ff;
+        font-weight: 700;
+        letter-spacing: 0.5px;
       }
       .btn-group {
         display: flex;
@@ -66,319 +101,355 @@
         border-radius: 8px;
         font-weight: 600;
         font-size: 14px;
-        transition: all 0.2s;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
       }
       button:disabled {
-        opacity: 0.5;
+        opacity: 0.45;
         cursor: not-allowed;
       }
       .btn-google {
         background: #ea4335;
         color: white;
       }
-      .btn-google:hover {
+      .btn-google:hover:not(:disabled) {
         background: #dc2626;
+        transform: translateY(-1px);
       }
       .btn-github {
-        background: #24292e;
+        background: #1f2937;
         color: white;
-        border: 1px solid #475569;
+        border: 1px solid #374151;
       }
-      .btn-github:hover {
-        background: #000;
+      .btn-github:hover:not(:disabled) {
+        background: #111827;
+        transform: translateY(-1px);
       }
       .btn-facebook {
         background: #1877f2;
         color: white;
       }
-      .btn-facebook:hover {
+      .btn-facebook:hover:not(:disabled) {
         background: #166fe5;
+        transform: translateY(-1px);
       }
       .btn-primary {
-        background: #0284c7;
+        background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
         color: white;
       }
-      .btn-primary:hover {
-        background: #0369a1;
+      .btn-primary:hover:not(:disabled) {
+        opacity: 0.92;
+        transform: translateY(-1px);
       }
       .btn-secondary {
-        background: #475569;
-        color: white;
+        background: #374151;
+        color: #f3f4f6;
       }
-      .btn-secondary:hover {
-        background: #334155;
+      .btn-secondary:hover:not(:disabled) {
+        background: #4b5563;
       }
       .btn-danger {
         background: #e11d48;
         color: white;
       }
-      .btn-danger:hover {
+      .btn-danger:hover:not(:disabled) {
         background: #be123c;
+      }
+      .btn-success {
+        background: #059669;
+        color: white;
+      }
+      .btn-success:hover:not(:disabled) {
+        background: #047857;
       }
       .input-group {
         display: flex;
         flex-direction: column;
         gap: 8px;
-        margin-bottom: 12px;
+        margin-bottom: 14px;
       }
       label {
         font-size: 13px;
-        color: #cbd5e1;
+        font-weight: 600;
+        color: #94a3b8;
       }
-      input {
-        background: #0f172a;
-        border: 1px solid #334155;
+      input, select, textarea {
+        background: #0b0f19;
+        border: 1px solid #1f2937;
         border-radius: 8px;
-        padding: 10px 14px;
-        color: white;
+        padding: 11px 14px;
+        color: #f8fafc;
         font-size: 14px;
+        transition: border-color 0.2s;
       }
-      input:focus {
+      input:focus, select:focus, textarea:focus {
         outline: none;
         border-color: #38bdf8;
       }
       pre {
-        background: #0b1120;
+        background: #06090e;
         border: 1px solid #1e293b;
         padding: 14px;
         border-radius: 8px;
         overflow-x: auto;
         font-size: 13px;
         color: #38bdf8;
+        line-height: 1.5;
       }
       .alert {
-        padding: 12px 16px;
+        padding: 12px 18px;
         border-radius: 8px;
         font-size: 14px;
-        margin-bottom: 12px;
         display: none;
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
       }
       .alert-error {
-        background: #7f1d1d;
-        border: 1px solid #991b1b;
-        color: #fecaca;
+        background: #450a0a;
+        border: 1px solid #7f1d1d;
+        color: #fca5a5;
       }
       .alert-success {
         background: #064e3b;
         border: 1px solid #065f46;
-        color: #a7f3d0;
+        color: #6ee7b7;
       }
-      .tag {
-        font-size: 11px;
-        padding: 2px 8px;
-        border-radius: 9999px;
-        background: #38bdf8;
-        color: #0f172a;
-        font-weight: 700;
+      .markdown-body {
+        background: #06090e;
+        border: 1px solid #1f2937;
+        border-radius: 8px;
+        padding: 16px;
+        color: #e2e8f0;
+        line-height: 1.6;
+        font-size: 14px;
+      }
+      .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+        color: #38bdf8;
+        margin-top: 12px;
+        margin-bottom: 8px;
+      }
+      .markdown-body pre {
+        background: #0f172a;
+        border: 1px solid #334155;
+        margin: 10px 0;
+      }
+      .markdown-body code {
+        background: #1e293b;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        color: #38bdf8;
+      }
+      .markdown-body img {
+        max-width: 100%;
+        border-radius: 8px;
+        margin: 12px 0;
+        border: 1px solid #334155;
+      }
+      .markdown-body ul, .markdown-body ol {
+        margin-left: 20px;
+        margin-bottom: 10px;
+      }
+      .markdown-body a {
+        color: #38bdf8;
+        text-decoration: underline;
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 680px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
     <div class="container">
+      <!-- Header -->
       <div class="header">
-        <h1>SkyGPT Auth Tester</h1>
-        <p>
-          Self-contained development sandbox for testing Social Logins & Admin
-          RBAC
-        </p>
+        <h1>SkyGPT Developer Control Center</h1>
+        <p>Production Microservices Sandbox • Better Auth • Redis Secondary Cache • LangGraph Multi-Agent System</p>
+        <div class="badge-row">
+          <span class="badge live">Gateway :4000</span>
+          <span class="badge live">Auth Service :4001</span>
+          <span class="badge live">Chat Service :4002</span>
+          <span class="badge live">Agents Service :4003</span>
+          <span class="badge">Redis :6379</span>
+          <span class="badge">MongoDB Atlas</span>
+        </div>
       </div>
 
+      <!-- Live Notification Banner -->
       <div id="statusAlert" class="alert"></div>
 
-      <!-- 1. Social Logins for Users -->
+      <!-- 1. Current Session & Identity Inspector -->
       <div class="card">
-        <h2>Social Logins <span class="tag">Role: User</span></h2>
-        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px">
-          Clicking initiates a POST request to
-          <code>/api/v1/auth/sign-in/social</code> and redirects to provider.
-        </p>
-        <div class="btn-group">
-          <button class="btn-google" onclick="signInSocial('google')">
-            <span>Google Sign-In</span>
-          </button>
-          <button class="btn-github" onclick="signInSocial('github')">
-            <span>GitHub Sign-In</span>
-          </button>
-          <button class="btn-facebook" onclick="signInSocial('facebook')">
-            <span>Facebook Sign-In</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 2. Admin Sign-In (Email/Password) -->
-      <div class="card">
-        <h2>Admin Sign-In <span class="tag">Role: Admin</span></h2>
-        <div class="input-group">
-          <label>Admin Email</label>
-          <input
-            type="email"
-            id="adminEmail"
-            value="admin@skygpt.com"
-            placeholder="admin@skygpt.com"
-          />
-        </div>
-        <div class="input-group">
-          <label>Admin Password</label>
-          <input
-            type="password"
-            id="adminPassword"
-            value="AdminSecurePassword123!"
-            placeholder="Password"
-          />
-        </div>
-        <button class="btn-primary" onclick="signInAdmin()">
-          Sign In as Admin
-        </button>
-      </div>
-
-      <!-- 3. Current Session Inspector -->
-      <div class="card">
-        <h2>Current Session & Role Inspector</h2>
+        <h2>
+          <span>🔐 Active Session & RBAC Inspector</span>
+          <span class="tag">Redis &lt;1ms Edge Cache</span>
+        </h2>
         <div class="btn-group" style="margin-bottom: 12px">
-          <button class="btn-secondary" onclick="checkSession()">
-            Refresh Session Info
-          </button>
+          <button class="btn-primary" onclick="checkSession()">Refresh Session Info</button>
           <button class="btn-danger" onclick="signOut()">Sign Out</button>
         </div>
-        <pre id="sessionOutput">
-// Click 'Refresh Session Info' to check active cookie</pre
-        >
+        <pre id="sessionOutput">// Click 'Refresh Session Info' to check active cookie & edge enrichment</pre>
       </div>
 
-      <!-- 4. Admin Creates Another Admin -->
+      <!-- 2. Authentication Sandbox -->
       <div class="card">
-        <h2>Admin Delegation <span class="tag">Protected</span></h2>
-        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 12px">
-          Requires an active session with <code>role: 'admin'</code>. Calls
-          <code>POST /api/v1/auth/admin/create-admin</code>.
+        <h2>
+          <span>👤 Authentication Sandbox</span>
+          <span class="tag">Better Auth</span>
+        </h2>
+        
+        <div class="grid-2">
+          <!-- Admin Email/Password Sign-In -->
+          <div style="background: #0c121e; padding: 16px; border-radius: 8px; border: 1px solid #1e293b;">
+            <h3 style="font-size: 14px; color: #38bdf8; margin-bottom: 12px;">Admin Login (Seed Account)</h3>
+            <div class="input-group">
+              <label>Admin Email</label>
+              <input type="email" id="adminEmail" value="admin@skygpt.com" placeholder="admin@skygpt.com" />
+            </div>
+            <div class="input-group">
+              <label>Admin Password</label>
+              <input type="password" id="adminPassword" value="AdminSecurePassword123!" placeholder="Password" />
+            </div>
+            <button class="btn-primary" style="width: 100%;" onclick="signInAdmin()">Sign In as Admin</button>
+          </div>
+
+          <!-- Social Logins for Users -->
+          <div style="background: #0c121e; padding: 16px; border-radius: 8px; border: 1px solid #1e293b;">
+            <h3 style="font-size: 14px; color: #38bdf8; margin-bottom: 12px;">Social OAuth 2.0</h3>
+            <p style="color: #94a3b8; font-size: 12px; margin-bottom: 12px">
+              Initiates OAuth flow via Better Auth. Public registration is open for social users:
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <button class="btn-google" onclick="signInSocial('google')">Google Sign-In</button>
+              <button class="btn-github" onclick="signInSocial('github')">GitHub Sign-In</button>
+              <button class="btn-facebook" onclick="signInSocial('facebook')">Facebook Sign-In</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Chat Service Conversation Sandbox -->
+      <div class="card">
+        <h2>
+          <span>💬 Chat Service & History Sandbox</span>
+          <span class="tag">Port 4002 (MongoDB)</span>
+        </h2>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">
+          Test creating threads and retrieving chat history with automatic title generation.
+        </p>
+        <div class="btn-group" style="margin-bottom: 12px;">
+          <button class="btn-secondary" onclick="loadUserConversations()">List User Conversations</button>
+          <button class="btn-success" onclick="createNewConversation()">+ Start New Conversation</button>
+        </div>
+        <div class="input-group">
+          <label>Active Conversation ID</label>
+          <input type="text" id="activeConvId" value="" placeholder="Click 'Start New Conversation' or select from list..." />
+        </div>
+        <pre id="convListOutput" style="max-height: 140px; overflow-y: auto;">// User conversations will appear here...</pre>
+      </div>
+
+      <!-- 4. Document Ingestion Sandbox (PDF / RAG Vector Store) -->
+      <div class="card">
+        <h2>
+          <span>📄 Document Ingest Sandbox</span>
+          <span class="tag">Gemini text-embedding-004</span>
+        </h2>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">
+          Ingest raw text or document excerpts into the in-memory vector store for the RAG Agent.
         </p>
         <div class="input-group">
-          <label>New Admin Name</label>
-          <input type="text" id="newAdminName" placeholder="Second Admin" />
+          <label>Document Name</label>
+          <input type="text" id="docName" value="company-policy.txt" placeholder="e.g. employee-handbook.pdf" />
         </div>
         <div class="input-group">
-          <label>New Admin Email</label>
-          <input
-            type="email"
-            id="newAdminEmail"
-            placeholder="admin2@skygpt.com"
-          />
-        </div>
-        <div class="input-group">
-          <label>New Admin Password</label>
-          <input
-            type="password"
-            id="newAdminPassword"
-            placeholder="Minimum 8 characters"
-          />
-        </div>
-        <button class="btn-primary" onclick="createAdmin()">
-          Create Admin
-        </button>
-      </div>
-    </div>
-
-    <!-- 4.5 Document Ingestion for PDF / RAG Agent -->
-    <div class="card">
-      <h2>📄 Document & PDF Ingest Sandbox <span class="tag">RAG Vector Store</span></h2>
-      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">
-        Paste raw document/policy text or notes to index them into the vector store.
-      </p>
-      <div class="input-group">
-        <label>Document Name</label>
-        <input type="text" id="docName" value="company-policy.txt" placeholder="e.g. employee-handbook.pdf" />
-      </div>
-      <div class="input-group">
-        <label>Document Content</label>
-        <textarea id="docContent" rows="4" style="width: 100%; background: #0f172a; color: #f8fafc; border: 1px solid #334155; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 13px;" placeholder="Paste sample policy, contract, or report text here...">SkyGPT Remote Work Policy 2026:
+          <label>Document Content</label>
+          <textarea id="docContent" rows="4" placeholder="Paste sample policy, contract, or report text here...">SkyGPT Remote Work Policy 2026:
 All core engineering team members are allowed up to 4 days of remote work per week.
 Annual learning stipend is $3,000 per engineer for AI certifications and conferences.
 Health insurance covers 100% of dental, vision, and wellness subscriptions.</textarea>
-      </div>
-      <button class="btn-primary" id="btnIngestDoc" onclick="ingestDocument()">Index Document in Vector Store</button>
-    </div>
-
-    <!-- 5. Interactive LangGraph Agent Tester -->
-    <div class="card">
-      <h2>
-        🤖 Multi-Agent Execution Tester <span class="tag">LangGraph</span>
-      </h2>
-      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 14px">
-        Test AI agents directly through the Gateway (requires active session).
-      </p>
-
-      <div class="input-group">
-        <label>Select Agent</label>
-        <select
-          id="agentSelect"
-          style="
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            padding: 10px 14px;
-            color: white;
-            font-size: 14px;
-          "
-        >
-          <option value="auto">auto (🤖 Autonomous Supervisor Router)</option>
-          <option value="chat">chat (General Conversational Agent)</option>
-          <option value="search">search (Web Search Agent)</option>
-          <option value="coding">coding (Code Specialist)</option>
-          <option value="pdf">pdf (RAG Specialist)</option>
-          <option value="ppt">ppt (Presentation Maker)</option>
-          <option value="image">image (Visual Creator)</option>
-        </select>
+        </div>
+        <button class="btn-primary" id="btnIngestDoc" onclick="ingestDocument()">Index Document in Vector Store</button>
       </div>
 
-      <div class="input-group">
-        <label>User Prompt</label>
-        <input
-          type="text"
-          id="agentPrompt"
-          value="Explain quantum computing in one short sentence."
-          placeholder="Ask something..."
-        />
-      </div>
+      <!-- 5. Autonomous LangGraph Multi-Agent Execution -->
+      <div class="card">
+        <h2>
+          <span>🤖 LangGraph Multi-Agent Execution Tester</span>
+          <span class="tag">6 Agents + Supervisor</span>
+        </h2>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 14px">
+          Execute LangGraph directly through the Gateway. The <strong>Supervisor Router</strong> classifies your prompt and picks the best agent automatically!
+        </p>
 
-      <button class="btn-primary" id="btnRunAgent" onclick="runAgent()">
-        Run LangGraph Agent
-      </button>
+        <div class="input-group">
+          <label>Select Agent Mode</label>
+          <select id="agentSelect">
+            <option value="auto">auto (🤖 Autonomous Supervisor Router - Recommends Best Agent)</option>
+            <option value="chat">chat (General Conversational Specialist)</option>
+            <option value="search">search (Web Search Agent with Tavily Tool Calling)</option>
+            <option value="coding">coding (Software Engineer Specialist - Low Temp)</option>
+            <option value="pdf">pdf (Document & PDF RAG Vector Store Specialist)</option>
+            <option value="ppt">ppt (Executive Presentation Designer - JSON Slides)</option>
+            <option value="image">image (Visual Creator - FLUX Prompt Engineer)</option>
+          </select>
+        </div>
 
-      <div style="margin-top: 14px">
-        <label
-          style="
-            font-size: 13px;
-            color: #cbd5e1;
-            display: block;
-            margin-bottom: 6px;
-          "
-          >AI Agent Response:</label
-        >
-        <pre id="agentOutput" style="white-space: pre-wrap; min-height: 60px">
-// AI output will appear here...</pre
-        >
+        <div class="input-group">
+          <label>User Prompt</label>
+          <textarea id="agentPrompt" rows="3" placeholder="Ask anything... e.g., 'What are latest news about SpaceX?', 'Write a TypeScript debounce function', 'Draw a cyberpunk city'">Explain how the LangGraph Supervisor coordinates multiple AI agents in 2 short sentences.</textarea>
+        </div>
+
+        <div class="btn-group" style="margin-bottom: 14px;">
+          <button class="btn-primary" id="btnRunAgent" onclick="runAgent()">Run LangGraph Agent</button>
+          <button class="btn-secondary" id="btnSendThroughChat" onclick="sendThroughChatService()">
+            Save via Chat Service (Full End-to-End Flow)
+          </button>
+        </div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label>Agent Output (Markdown Rendered):</label>
+            <span id="resolvedAgentTag" class="badge" style="display: none;"></span>
+          </div>
+          <div id="agentOutputMarkdown" class="markdown-body">
+            <em>AI response will render here with full Markdown, code formatting, citations, and images...</em>
+          </div>
+        </div>
       </div>
     </div>
 
     <script>
-      const API_BASE = "/api/v1/auth";
+      const AUTH_BASE = "/api/v1/auth";
+      const CHAT_BASE = "/api/v1/chat";
+      const AGENTS_BASE = "/api/v1/agents";
 
+      // Alert Banner Utility
       function showAlert(message, isError = false) {
         const el = document.getElementById("statusAlert");
         el.style.display = "block";
         el.className = isError ? "alert alert-error" : "alert alert-success";
         el.textContent = message;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      // 1. Social Login Trigger
+      // 1. Social Logins
       async function signInSocial(provider) {
         showAlert(`Initiating ${provider} login...`);
         try {
-          const res = await fetch(`${API_BASE}/sign-in/social`, {
+          const res = await fetch(`${AUTH_BASE}/sign-in/social`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -387,103 +458,55 @@ Health insurance covers 100% of dental, vision, and wellness subscriptions.</tex
               callbackURL: window.location.href,
             }),
           });
-
           const data = await res.json();
-          if (!res.ok) {
-            throw new Error(data.message || data.error || `HTTP ${res.status}`);
-          }
-
+          if (!res.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
           if (data.url) {
-            showAlert(`Redirecting to ${provider}...`);
             window.location.href = data.url;
           } else {
-            showAlert(
-              `Response received without URL: ${JSON.stringify(data)}`,
-              true,
-            );
+            showAlert(`Received response without URL: ${JSON.stringify(data)}`, true);
           }
         } catch (err) {
-          showAlert(
-            `Failed to initiate ${provider} login: ${err.message}`,
-            true,
-          );
+          showAlert(`Failed to initiate ${provider} login: ${err.message}`, true);
         }
       }
 
-      // 2. Admin Email/Password Sign-In
+      // 2. Admin Sign-In (Email/Password)
       async function signInAdmin() {
         const email = document.getElementById("adminEmail").value.trim();
         const password = document.getElementById("adminPassword").value;
-
         try {
-          const res = await fetch(`${API_BASE}/sign-in/email`, {
+          const res = await fetch(`${AUTH_BASE}/sign-in/email`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({ email, password }),
           });
-
           const data = await res.json();
-          if (!res.ok) {
-            throw new Error(data.message || data.error || `HTTP ${res.status}`);
-          }
-
-          showAlert(
-            `Logged in successfully as Admin: ${data.user?.email || email}`,
-          );
+          if (!res.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
+          showAlert(`Signed in successfully as Admin: ${data.user?.email || email}`);
           checkSession();
         } catch (err) {
           showAlert(`Admin sign-in failed: ${err.message}`, true);
         }
       }
 
-      // 3. Check Session
+      // 3. Inspect Session
       async function checkSession() {
         try {
-          const res = await fetch(`${API_BASE}/get-session`, {
+          const res = await fetch(`${AUTH_BASE}/get-session`, {
             credentials: "include",
           });
           const data = await res.json();
-          document.getElementById("sessionOutput").textContent = JSON.stringify(
-            data,
-            null,
-            2,
-          );
+          document.getElementById("sessionOutput").textContent = JSON.stringify(data, null, 2);
         } catch (err) {
-          document.getElementById("sessionOutput").textContent =
-            `Error reading session: ${err.message}`;
+          document.getElementById("sessionOutput").textContent = `Error reading session: ${err.message}`;
         }
       }
 
-      // 4. Create Another Admin
-      async function createAdmin() {
-        const name = document.getElementById("newAdminName").value.trim();
-        const email = document.getElementById("newAdminEmail").value.trim();
-        const password = document.getElementById("newAdminPassword").value;
-
-        try {
-          const res = await fetch(`${API_BASE}/admin/create-admin`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ name, email, password }),
-          });
-
-          const data = await res.json();
-          if (!res.ok) {
-            throw new Error(data.message || data.error || `HTTP ${res.status}`);
-          }
-
-          showAlert(`New admin created: ${data.data?.email}`);
-        } catch (err) {
-          showAlert(`Failed to create admin: ${err.message}`, true);
-        }
-      }
-
-      // 5. Sign Out
+      // 4. Sign Out
       async function signOut() {
         try {
-          await fetch(`${API_BASE}/sign-out`, {
+          await fetch(`${AUTH_BASE}/sign-out`, {
             method: "POST",
             credentials: "include",
           });
@@ -494,11 +517,54 @@ Health insurance covers 100% of dental, vision, and wellness subscriptions.</tex
         }
       }
 
-      // 5.5 Ingest Document for RAG / PDF Agent
+      // 5. Chat Service: List Conversations
+      async function loadUserConversations() {
+        try {
+          const res = await fetch(`${CHAT_BASE}/conversations`, {
+            credentials: "include",
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || data.error);
+
+          document.getElementById("convListOutput").textContent = JSON.stringify(data.data, null, 2);
+          if (Array.isArray(data.data) && data.data.length > 0) {
+            document.getElementById("activeConvId").value = data.data[0]._id;
+            showAlert(`Found ${data.data.length} conversation(s). Active thread set.`);
+          } else {
+            showAlert("No conversations found yet. Click '+ Start New Conversation'!");
+          }
+        } catch (err) {
+          showAlert(`Failed to load conversations: ${err.message}`, true);
+        }
+      }
+
+      // 6. Chat Service: Create New Conversation
+      async function createNewConversation() {
+        try {
+          const res = await fetch(`${CHAT_BASE}/conversations`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ title: "New Exploration Thread" }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || data.error);
+
+          const newId = data.data._id;
+          document.getElementById("activeConvId").value = newId;
+          showAlert(`Created new conversation: ${newId}`);
+          loadUserConversations();
+        } catch (err) {
+          showAlert(`Failed to create conversation: ${err.message}`, true);
+        }
+      }
+
+      // 7. RAG: Ingest Document
       const ingestDocument = async () => {
         const fileName = document.getElementById("docName").value.trim();
         const text = document.getElementById("docContent").value.trim();
         const btn = document.getElementById("btnIngestDoc");
+        const convId = document.getElementById("activeConvId").value.trim() || "default-session";
 
         if (!text) {
           showAlert("Please enter document content to index", true);
@@ -506,20 +572,19 @@ Health insurance covers 100% of dental, vision, and wellness subscriptions.</tex
         }
 
         btn.disabled = true;
-        btn.textContent = "Embedding & Indexing (Gemini text-embedding-004)...";
+        btn.textContent = "Embedding & Indexing (text-embedding-004)...";
 
         try {
-          const res = await fetch("/api/v1/agents/documents/ingest", {
+          const res = await fetch(`${AGENTS_BASE}/documents/ingest`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({
-              conversationId: "default-session",
+              conversationId: convId,
               fileName,
               text,
             }),
           });
-
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || data.error);
 
@@ -532,11 +597,13 @@ Health insurance covers 100% of dental, vision, and wellness subscriptions.</tex
         }
       };
 
-      // 6. Execute LangGraph Agent
+      // 8. Direct LangGraph Execution
       const runAgent = async () => {
         const prompt = document.getElementById("agentPrompt").value.trim();
         const agentType = document.getElementById("agentSelect").value;
-        const outputEl = document.getElementById("agentOutput");
+        const convId = document.getElementById("activeConvId").value.trim() || "default-session";
+        const outputEl = document.getElementById("agentOutputMarkdown");
+        const tagEl = document.getElementById("resolvedAgentTag");
         const btn = document.getElementById("btnRunAgent");
 
         if (!prompt) {
@@ -546,29 +613,32 @@ Health insurance covers 100% of dental, vision, and wellness subscriptions.</tex
 
         btn.disabled = true;
         btn.textContent = "Thinking (LangGraph running)...";
-        outputEl.textContent = "Invoking Gemini via LangGraph...";
+        outputEl.innerHTML = "<em>Invoking LangGraph agent...</em>";
+        tagEl.style.display = "none";
 
         try {
-          const res = await fetch("/api/v1/agents/execute", {
+          const res = await fetch(`${AGENTS_BASE}/execute`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            credentials: "include", // Sends session cookie
+            credentials: "include",
             body: JSON.stringify({
               agentType: agentType,
-              conversationId: "default-session",
+              conversationId: convId,
               messages: [{ role: "user", content: prompt }],
             }),
           });
 
           const data = await res.json();
+          if (!res.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
 
-          if (!res.ok) {
-            throw new Error(data.message || data.error || `HTTP ${res.status}`);
-          }
+          const rawContent = data.data?.content || JSON.stringify(data, null, 2);
+          outputEl.innerHTML = marked.parse(rawContent);
 
-          outputEl.textContent =
-            data.data?.content || JSON.stringify(data, null, 2);
-          showAlert(`Agent [${agentType}] executed successfully!`);
+          const used = data.data?.agentUsed || agentType;
+          tagEl.textContent = `Executed by: [${used}] Agent`;
+          tagEl.style.display = "inline-block";
+
+          showAlert(`Agent [${used}] finished successfully!`);
         } catch (err) {
           outputEl.textContent = `Error: ${err.message}`;
           showAlert(`Agent failed: ${err.message}`, true);
@@ -578,7 +648,64 @@ Health insurance covers 100% of dental, vision, and wellness subscriptions.</tex
         }
       };
 
-      // Run check on load
+      // 9. Full End-to-End: Send via Chat Service
+      const sendThroughChatService = async () => {
+        let convId = document.getElementById("activeConvId").value.trim();
+        const prompt = document.getElementById("agentPrompt").value.trim();
+        const agentType = document.getElementById("agentSelect").value;
+        const outputEl = document.getElementById("agentOutputMarkdown");
+        const tagEl = document.getElementById("resolvedAgentTag");
+        const btn = document.getElementById("btnSendThroughChat");
+
+        if (!prompt) {
+          showAlert("Please enter a prompt", true);
+          return;
+        }
+
+        // If no active conversation, create one first
+        if (!convId) {
+          showAlert("No active conversation thread. Creating one automatically...");
+          await createNewConversation();
+          convId = document.getElementById("activeConvId").value.trim();
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Processing via Chat Service...";
+        outputEl.innerHTML = "<em>Chat Service saving to DB and dispatching to Agents Service...</em>";
+
+        try {
+          const res = await fetch(`${CHAT_BASE}/conversations/${convId}/messages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              content: prompt,
+              agentType: agentType,
+            }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
+
+          const assistantText = data.data?.assistantMessage?.content || "No content returned";
+          outputEl.innerHTML = marked.parse(assistantText);
+
+          const used = data.data?.agentUsed || agentType;
+          tagEl.textContent = `Handled by: [${used}] • Saved to DB`;
+          tagEl.style.display = "inline-block";
+
+          showAlert(`Message saved in MongoDB and answered by [${used}]!`);
+          loadUserConversations();
+        } catch (err) {
+          outputEl.textContent = `Error: ${err.message}`;
+          showAlert(`Chat flow failed: ${err.message}`, true);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Save via Chat Service (Full End-to-End Flow)";
+        }
+      };
+
+      // Initial check on page load
       checkSession();
     </script>
   </body>
