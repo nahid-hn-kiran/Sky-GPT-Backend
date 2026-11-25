@@ -34,7 +34,10 @@ app.use((req, res, next) => {
 });
 
 app.use(cookieParser());
-app.use(express.json());
+
+// Note: We do NOT mount express.json() globally on the Gateway because
+// express-http-proxy needs to stream raw request bodies (JSON, multipart, files) directly
+// to the downstream microservices (Chat, Agents, Auth, Billing), which parse their own bodies.
 
 app.use(routes);
 

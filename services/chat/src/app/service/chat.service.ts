@@ -134,6 +134,7 @@ export interface SendMessageOptions {
   userId: string;
   content: string;
   agentType?: string;
+  imageUrl?: string;
 }
 
 /**
@@ -144,11 +145,18 @@ export const sendMessageAndGetAIResponse = async ({
   userId,
   content,
   agentType = "chat",
+  imageUrl,
 }: SendMessageOptions) => {
   // 1. Verify conversation ownership and save the user message
   const userResult = await createUserMessage(conversationId, userId, content);
   if (!userResult) {
     return null;
+  }
+
+  // If user attached an image, save imageUrl to the user message
+  if (imageUrl) {
+    await Message.findByIdAndUpdate(userResult.message._id, { imageUrl });
+    (userResult.message as any).imageUrl = imageUrl;
   }
 
   // 2. Fetch recent conversation history (last 10 messages) for agent memory
@@ -157,9 +165,10 @@ export const sendMessageAndGetAIResponse = async ({
     .limit(10)
     .lean();
 
-  const formattedHistory = history.map((msg) => ({
+  const formattedHistory = history.map((msg: any) => ({
     role: msg.role as "user" | "assistant" | "system",
     content: msg.content,
+    imageUrl: msg.imageUrl,
   }));
 
   // 3. Call the Agents Service (Port 4003)

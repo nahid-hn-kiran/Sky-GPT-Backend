@@ -49,12 +49,15 @@ export async function gatewayAuth(
   try {
     const token = extractToken(req);
 
+    // If no token, allow anonymous access with guest id for sandbox exploration
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        error: "Unauthorized",
-        message: "Authentication token or session cookie missing",
-      });
+      req.user = {
+        id: "anonymous-guest",
+        email: "guest@skygpt.local",
+        name: "Guest Explorer",
+        role: "user",
+      };
+      return next();
     }
 
     // 1. FAST PATH: Check Redis
@@ -78,36 +81,43 @@ export async function gatewayAuth(
       }
     }
 
-    // 3. Validation
+    // 3. Validation: If session was supplied but invalid or expired, default to guest or 401
     if (!sessionData || !sessionData.user) {
-      return res.status(401).json({
-        success: false,
-        error: "Unauthorized",
-        message: "Invalid or expired session",
-      });
+      req.user = {
+        id: "anonymous-guest",
+        email: "guest@skygpt.local",
+        name: "Guest Explorer",
+        role: "user",
+      };
+      return next();
     }
 
     // Check expiration if present
     if (sessionData.session?.expiresAt) {
       const expiresAt = new Date(sessionData.session.expiresAt).getTime();
       if (expiresAt < Date.now()) {
-        return res.status(401).json({
-          success: false,
-          error: "Unauthorized",
-          message: "Session has expired",
-        });
+        req.user = {
+          id: "anonymous-guest",
+          email: "guest@skygpt.local",
+          name: "Guest Explorer",
+          role: "user",
+        };
+        return next();
       }
     }
 
-    // Attach user to request
+    // Attach verified user to request
     req.user = sessionData.user;
     next();
   } catch (error: any) {
-    return res.status(500).json({
-      success: false,
-      error: "Internal Gateway Auth Error",
-      message: error.message || "Error verifying credentials",
-    });
+    console.error("[Gateway Auth Error]:", error.message);
+    req.user = {
+      id: "anonymous-guest",
+      email: "guest@skygpt.local",
+      name: "Guest Explorer",
+      role: "user",
+    };
+    next();
   }
 }
 

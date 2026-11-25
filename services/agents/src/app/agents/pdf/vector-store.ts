@@ -13,7 +13,7 @@ export interface DocumentChunk {
 
 // 1. Initialize Google Embeddings model
 export const embeddings = new GoogleGenerativeAIEmbeddings({
-  model: "text-embedding-004",
+  model: "gemini-embedding-001",
   apiKey: config.geminiApiKey,
 });
 

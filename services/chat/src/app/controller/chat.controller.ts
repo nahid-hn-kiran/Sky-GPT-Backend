@@ -160,7 +160,7 @@ export const createMessageHandler = async (req: Request, res: Response) => {
   try {
     const userId = req.headers["x-user-id"] as string;
     const { id: conversationId } = req.params;
-    const { content, agentType } = req.body;
+    const { content, agentType, imageUrl } = req.body;
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -168,18 +168,19 @@ export const createMessageHandler = async (req: Request, res: Response) => {
         message: "User ID missing",
       });
     }
-    if (!content || typeof content !== "string" || content.trim() === "") {
+    if ((!content || typeof content !== "string" || content.trim() === "") && !imageUrl) {
       return res.status(400).json({
         success: false,
         error: "Validation Error",
-        message: "Message content is required and cannot be empty",
+        message: "Message content or imageUrl is required",
       });
     }
     const result = await chatService.sendMessageAndGetAIResponse({
       conversationId: conversationId as string,
       userId,
-      content: content.trim(),
+      content: (content || "Please analyze this image.").trim(),
       agentType: agentType || "chat",
+      imageUrl,
     });
     if (!result) {
       return res.status(404).json({
