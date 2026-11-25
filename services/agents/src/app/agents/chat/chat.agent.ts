@@ -6,7 +6,7 @@ import { AgentState, AgentStateType } from "../types";
 
 // 1. Initialize Gemini LLM with API Key from config
 const model = new ChatGoogleGenerativeAI({
-  model: "gemini-3.1-flash-lite",
+  model: "gemini-3.5-flash-lite",
   temperature: 0.7,
   apiKey: config.geminiApiKey,
 });

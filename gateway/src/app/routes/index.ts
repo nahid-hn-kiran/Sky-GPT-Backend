@@ -50,9 +50,19 @@ router.use(
   "/api/v1/chat",
   gatewayAuth,
   proxy(config.services.chat, {
+    limit: "50mb", // Allow multipart file uploads up to 50MB
     proxyReqPathResolver: (req) => `/api/v1/chat${req.url}`,
     proxyReqOptDecorator: injectUserHeaders,
     proxyErrorHandler: handleProxyError("Chat Service"),
+  }),
+);
+
+// 2.5 Static Uploads Proxy (Public: to view uploaded images and documents)
+router.use(
+  "/uploads",
+  proxy(config.services.chat, {
+    proxyReqPathResolver: (req) => `/uploads${req.url}`,
+    proxyErrorHandler: handleProxyError("Uploads Storage"),
   }),
 );
 

@@ -64,7 +64,7 @@ const toolNode = new ToolNode(tools);
 
 // 3. Initialize Gemini and bind our search tool to it
 const model = new ChatGoogleGenerativeAI({
-  model: "gemini-3.1-flash-lite",
+  model: "gemini-3.5-flash-lite",
   temperature: 0.2, // Lower temperature for factual accuracy
   apiKey: config.geminiApiKey,
 }).bindTools(tools);

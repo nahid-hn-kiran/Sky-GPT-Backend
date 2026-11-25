@@ -55,12 +55,21 @@ export const executeAgent = async (
   // 4. Extract the last message (the AI's final answer)
   const lastMessage = result.messages[result.messages.length - 1];
 
+  let cleanContent = "";
+  if (typeof lastMessage.content === "string") {
+    cleanContent = lastMessage.content;
+  } else if (Array.isArray(lastMessage.content)) {
+    // Flatten array of parts [{ type: 'text', text: '...' }]
+    cleanContent = lastMessage.content
+      .map((part: any) => (typeof part === "string" ? part : part?.text || ""))
+      .join("");
+  } else {
+    cleanContent = JSON.stringify(lastMessage.content);
+  }
+
   return {
     role: "assistant" as const,
-    content:
-      typeof lastMessage.content === "string"
-        ? lastMessage.content
-        : JSON.stringify(lastMessage.content),
+    content: cleanContent,
     agentUsed: (result as any).agentUsed || agentType,
   };
 };

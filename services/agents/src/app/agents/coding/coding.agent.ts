@@ -6,7 +6,7 @@ import { AgentState, AgentStateType } from "../types";
 
 // 1. Initialize Gemini with low temperature for code accuracy
 const model = new ChatGoogleGenerativeAI({
-  model: "gemini-3.1-flash-lite",
+  model: "gemini-3.5-flash-lite",
   temperature: 0.1, // Near-zero temperature minimizes syntax bugs and hallucinations
   apiKey: config.geminiApiKey,
 });

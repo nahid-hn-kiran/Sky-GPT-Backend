@@ -7,7 +7,7 @@ import { searchSimilarChunks } from "./vector-store";
 
 // 1. Initialize Gemini with balanced temperature for document Q&A
 const model = new ChatGoogleGenerativeAI({
-  model: "gemini-3.1-flash-lite",
+  model: "gemini-3.5-flash-lite",
   temperature: 0.2,
   apiKey: config.geminiApiKey,
 });

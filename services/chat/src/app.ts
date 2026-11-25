@@ -1,8 +1,12 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
+import path from 'path';
 import routes from './app/routes';
 
 const app: Application = express();
+
+// Serve uploads folder statically
+app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
 
 // Universal CORS handler for all origins (localhost:3000, 4000, etc.)
 app.use((req, res, next) => {

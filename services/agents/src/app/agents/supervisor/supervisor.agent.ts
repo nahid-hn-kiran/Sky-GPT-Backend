@@ -11,7 +11,7 @@ import { AgentStateType, AgentType } from "../types";
 
 // 1. Fast, low-temperature Gemini model for intent classification
 const routerModel = new ChatGoogleGenerativeAI({
-  model: "gemini-3.1-flash-lite",
+  model: "gemini-3.5-flash-lite",
   temperature: 0.1, // Near zero for deterministic classification
   apiKey: config.geminiApiKey,
 });
